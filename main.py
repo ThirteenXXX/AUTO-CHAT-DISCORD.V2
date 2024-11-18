@@ -5,6 +5,7 @@ from colorama import Fore
 import random
 from datetime import datetime
 import pytz
+import hashlib
 
 ascii_art = r'''
   ________    _      __                 _  __
@@ -32,24 +33,31 @@ colors = ['32']
 colored_ascii = gradient_text(ascii_art, colors)
 print(colored_ascii)
 
+def hash_token(token):
+    """SHA256"""
+    return hashlib.sha256(token.encode()).hexdigest()
+
 def validate_token_locally(token):
     try:
         with open("ThirteenX.txt", "r") as file:
-            valid_tokens = [line.strip() for line in file.readlines()]
-            
-        return token in valid_tokens
+            valid_hashes = [line.strip() for line in file.readlines()]
+        
+        token_hash = hash_token(token)
+
+        return token_hash in valid_hashes
     except FileNotFoundError:
         print(Fore.RED + "File tidak ditemukan. Pastikan file tersebut ada.")
         return False
     except Exception as e:
-        print(Fore.RED + f"Terjadi kesalahan saat membaca file token: {e}")
+        print(Fore.RED + f"Terjadi kesalahan saat membaca file key: {e}")
         return False
-license_key = input("ᴍᴀꜱᴜᴋᴋᴀɴ ᴛᴏᴋᴇɴ ᴀɴᴅᴀ: ").strip()
+
+license_key = input("ᴍᴀꜱᴜᴋᴀɴ ᴋᴇʏ ᴀɴᴅᴀ: ").strip()
 
 if validate_token_locally(license_key):
-    print(Fore.GREEN + "ɴɪᴄᴇ, ᴛᴏᴋᴇɴ ᴠᴀʟɪᴅ")
+    print(Fore.GREEN + " >>>>>  ᴋᴇʏ ᴠᴀʟɪᴅ  <<<<<")
 else:
-    print(Fore.RED + "ᴛᴏᴋᴇɴ ᴛɪᴅᴀᴋ ᴠᴀʟɪᴅ, ʜᴜʙᴜɴɢɪ ᴛʜɪʀᴛᴇᴇɴx2023@ɢᴍᴀɪʟ.ᴄᴏᴍ")
+    print(Fore.RED + "ᴋᴇʏ ᴛɪᴅᴀᴋ ᴠᴀʟɪᴅ, ʜᴜʙᴜɴɢɪ ᴛʜɪʀᴛᴇᴇɴx2023@ɢᴍᴀɪʟ.ᴄᴏᴍ")
     exit()
 
 channel_id = input("ᴍᴀꜱᴜᴋᴋᴀɴ ɪᴅ ᴄʜᴀɴɴᴇʟ: ").strip()
