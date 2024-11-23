@@ -261,20 +261,6 @@ while True:
 
                     response_message = dapatkan_respons_cohere(user_message)
 
-                    humanizer_variants = [
-                        f"{response_message} hehe",
-                        f"{response_message} haha",
-                        f"{response_message} bro", 
-                        f"{response_message} buddy",
-                        f"{response_message} my friend",
-                        f"{response_message} fam", 
-                        f"{response_message} mate",
-                        f"{response_message} brother",
-                        f"{response_message} bruh", 
-                        response_message
-                    ]
-                    response_message = random.choice(humanizer_variants)
-
                     payload = {
                         'content': response_message,
                         'message_reference': {
