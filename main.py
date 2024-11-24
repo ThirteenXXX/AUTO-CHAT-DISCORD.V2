@@ -213,9 +213,10 @@ if not bot_id:
 replay_mode = input("𝙿𝙸𝙻𝙸𝙷 𝙼𝙴𝚃𝙷𝙾𝙳𝙴 𝚁𝙴𝙿𝙻𝙰𝚈:\n1. 𝚁𝙴𝙿𝙻𝙰𝚈 𝙿𝙴𝚂𝙰𝙽 𝚃𝙴𝚁𝙱𝙰𝚁𝚄\n2. 𝚁𝙴𝙿𝙻𝙰𝚈 𝙿𝙴𝚂𝙰𝙽 𝚃𝙰𝚁𝙶𝙴𝚃 𝚄𝚂𝙴𝚁𝙽𝙰𝙼𝙴\n𝙿𝙸𝙻𝙸𝙷 𝙼𝙴𝚃𝙷𝙾𝙳𝙴 (1/2): ").strip()
 
 if replay_mode == "2":
-    target_username = input("𝙼𝙰𝚂𝚄𝙺𝙰𝙽 𝚄𝚂𝙴𝚁𝙽𝙰𝙼𝙴 𝚃𝙰𝚁𝙶𝙴𝚃: ").strip()
+    target_username = input("𝙼𝙰𝚂𝚄𝙺𝙰𝙽 𝚄𝚂𝙴𝚁𝙽𝙰𝙼𝙴 𝚃𝙰𝚁𝙶𝙴𝚃: ").strip().split(',')
+    target_username = [username.strip() for username in target_username]
 else:
-    target_username = None
+    target_username = []
 
 while True:
     try:
@@ -238,7 +239,7 @@ while True:
                     should_reply = user_id != bot_id and (last_message_id is None or message_id != last_message_id)
                 elif replay_mode == "2":  # Membalas pesan jika username target membalas pesan bot
                     should_reply = (user_id != bot_id 
-                                    and username == target_username
+                                    and username in target_username
                                     and referenced_message is not None
                                     and referenced_message['author']['id'] == bot_id)
                 else:
