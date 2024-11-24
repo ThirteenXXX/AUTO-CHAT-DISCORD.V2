@@ -14,28 +14,31 @@ ascii_art = r'''
  / / / / / / / /  / /_/  __/  __/ / / /   |  
 /_/ /_/ /_/_/_/   \__/\___/\___/_/ /_/_/|_|  
 
-            >>> ᴀᴜᴛᴏ ʀᴇᴘʟᴀʏ ᴄʜᴀᴛ ᴅᴄ ᴡɪᴛʜ ᴀɪ
+              >>> ᴀᴜᴛᴏ ʀᴇᴘʟᴀʏ ᴄʜᴀᴛ ᴅᴄ ᴡɪᴛʜ ᴀɪ
 ___________________________________________
 '''
 
 def gradient_text(text, colors):
     colored_text = ""
-    color_index = 0
-    for char in text:
-        if char == ' ':
-            colored_text += " "
-        else:
-            colored_text += f"\033[{colors[color_index]}m{char}\033[0m"
-        color_index = (color_index + 1) % len(colors)
+    lines = text.split('\n')
+    for line in lines:
+        color = random.choice(colors)
+        colored_text += f"\033[{color}m{line}\033[0m\n"
     return colored_text
 
-colors = ['32']
-colored_ascii = gradient_text(ascii_art, colors)
-print(colored_ascii)
+def animate_text(text, colors, delay=0.1):
+    os.system('cls' if os.name == 'nt' else 'clear')
+    lines = text.split('\n')
+    for line in lines:
+        color = random.choice(colors)
+        print(f"\033[{color}m{line}\033[0m")
+        time.sleep(delay)  
+colors = ['36','36','37','37']
+
+animate_text(ascii_art, colors)
 
 
 def hash_token(token):
-    """SHA256"""
     return hashlib.sha256(token.encode()).hexdigest()
 
 def validate_token_locally(token):
@@ -53,10 +56,23 @@ def validate_token_locally(token):
         print(Fore.RED + f"Terjadi kesalahan saat membaca file key: {e}")
         return False
 
+def animate_text(text, color, delay=0.1):
+    for char in text:
+        print(f"{color}{char}", end='', flush=True)
+        time.sleep(delay)
+    print()
+
 license_key = input("\n𝙼𝙰𝚂𝚄𝙺𝙰𝙽 𝙺𝙴𝚈: ").strip()
 
 if validate_token_locally(license_key):
-    print(Fore.GREEN + "\n>>>>>  𝙺𝙴𝚈 𝚅𝙰𝙻𝙸𝙳  <<<<<")
+    animate_text(r'''
+  _  _________   __         __     ___    _     ___ ____  
+ | |/ / ____\ \ / /         \ \   / / \  | |   |_ _|  _ \ 
+ | ' /|  _|  \ V /   _____   \ \ / / _ \ | |    | || | | |
+ | . \| |___  | |   |_____|   \ V / ___ \| |___ | || |_| |
+ |_|\_\_____| |_|              \_/_/   \_\_____|___|____/ 
+                                                          
+ ''', Fore.CYAN, delay=0.005)
 else:
     print(Fore.RED + "\n𝙺𝙴𝚈 𝚃𝙸𝙳𝙰𝙺 𝚅𝙰𝙻𝙸𝙳, 𝙷𝚄𝙱𝚄𝙽𝙶𝙸 𝚃𝙷𝙸𝚁𝚃𝙴𝙴𝙽𝚇2023@𝙶𝙼𝙰𝙸𝙻.𝙲𝙾𝙼")
     exit()
@@ -66,21 +82,18 @@ channel_id = input("\n𝙼𝙰𝚄𝚂𝚄𝙺𝙰𝙽 𝙸𝙳 𝙲𝙷𝙰𝙽
 try:
     sleep_interval = float(input("𝙼𝙰𝚂𝚄𝙺𝙰𝙽 𝚆𝙰𝙺𝚃𝚄 𝙸𝙽𝚃𝙴𝚁𝚅𝙰𝙻 𝚂𝙻𝙴𝙴𝙿: ").strip())
     if sleep_interval < 0:
-        print(Fore.RED + "Waktu interval terlalu kecil. Menggunakan nilai default 1 detik.")
-        sleep_interval = 1
+        print(Fore.RED + "Waktu interval terlalu kecil. Menggunakan nilai default 5 detik.")
+        sleep_interval = 5
 except ValueError:
-    print(Fore.RED + "Input tidak valid. Menggunakan nilai default 1 detik.")
-    sleep_interval = 1
+    print(Fore.RED + "Input tidak valid. Menggunakan nilai default 5 detik.")
+    sleep_interval = 5
 
-# Read Discord token from file
 with open("token.txt", "r") as f:
     discord_token = f.readline().strip()
 
-# Read multiple API keys from file
 with open("cohere_api_keys.txt", "r") as f:
     cohere_api_keys = [line.strip() for line in f.readlines()]
 
-# Initialize API key index
 current_api_key_index = 0
 
 def get_current_api_key():
@@ -99,7 +112,6 @@ prompts = {
     "curious": "{user_message}\nRespond with a short answer no more than 50 letter like someone who doesn't know much and always asks questions:"
 }
 
-# Tambahkan kata kunci baru di bagian keywords
 keywords = {
     "curious": ["what", "how", "why","help"]
 }
@@ -160,8 +172,8 @@ def dapatkan_respons_cohere(pesan_pengguna):
                 if response.status_code == 200:
                     response_data = response.json()
                     respons = response_data['generations'][0]['text'].strip()
-                    break  # Exit the loop as the API call succeeded
-                elif response.status_code == 429:  # Rate limit error
+                    break
+                elif response.status_code == 429:
                     print(Fore.RED + "API limit reached. Rotating API key...")
                     rotate_api_key()
                 else:
@@ -197,69 +209,59 @@ if not bot_id:
     print(Fore.RED + "Tidak dapat mendapatkan bot ID. Periksa token atau koneksi Anda.")
     exit()
     
-def get_message_by_username(username_target, messages):
-    for message in messages:
-        if message['author']['username'] == username_target:
-            return message
-    return None
+# Tambahkan opsi replay
+replay_mode = input("𝙿𝙸𝙻𝙸𝙷 𝙼𝙴𝚃𝙷𝙾𝙳𝙴 𝚁𝙴𝙿𝙻𝙰𝚈:\n1. 𝚁𝙴𝙿𝙻𝙰𝚈 𝙿𝙴𝚂𝙰𝙽 𝚃𝙴𝚁𝙱𝙰𝚁𝚄\n2. 𝚁𝙴𝙿𝙻𝙰𝚈 𝙿𝙴𝚂𝙰𝙽 𝚃𝙰𝚁𝙶𝙴𝚃 𝚄𝚂𝙴𝚁𝙽𝙰𝙼𝙴\n𝙿𝙸𝙻𝙸𝙷 𝙼𝙴𝚃𝙷𝙾𝙳𝙴 (1/2): ").strip()
 
-# Fungsi untuk memilih opsi replay hanya sekali
-def replay_option():
-    while True:
-        print("\n𝙿𝙸𝙻𝙸𝙷 𝙼𝙴𝚃𝙷𝙾𝙳𝙴 𝚁𝙴𝙿𝙻𝙰𝚈:")
-        print("1. 𝚁𝙴𝙿𝙻𝙰𝚈 𝙿𝙴𝚂𝙰𝙽 𝚃𝙴𝚁𝙱𝙰𝚁𝚄")
-        print("2. 𝚁𝙴𝙿𝙻𝙰𝚈 𝙿𝙴𝚂𝙰𝙽 𝚃𝙰𝚁𝙶𝙴𝚃 𝚄𝚂𝙴𝚁𝙽𝙰𝙼𝙴")
-        option = input("\n𝙿𝙸𝙻𝙸𝙷 𝙼𝙴𝚃𝙷𝙾𝙳𝙴 (1/2): ").strip()
-
-        if option in ["1", "2"]:
-            return option
-        else:
-            print(Fore.RED + "Pilihan tidak valid. Silakan coba lagi.")
-
-# Mendapatkan pilihan replay di awal
-replay_mode = replay_option()
-
-# Jika opsi 2 dipilih, minta daftar username target sekali di awal
-target_usernames = []
 if replay_mode == "2":
-    usernames_input = input("𝙼𝙰𝚂𝚄𝙺𝙰𝙽 𝚄𝚂𝙴𝚁𝙽𝙰𝙼𝙴 𝚃𝙰𝚁𝙶𝙴𝚃: ").strip()
-    target_usernames = [username.strip() for username in usernames_input.split(",")]
-
-# Simpan ID pesan terakhir yang sudah diproses
-processed_message_ids = set()
+    target_username = input("𝙼𝙰𝚂𝚄𝙺𝙰𝙽 𝚄𝚂𝙴𝚁𝙽𝙰𝙼𝙴 𝚃𝙰𝚁𝙶𝙴𝚃: ").strip()
+else:
+    target_username = None
 
 while True:
     try:
-        # Mendapatkan pesan dari channel
-        response = requests.get(
-            f'https://discord.com/api/v9/channels/{channel_id}/messages', 
-            headers={'Authorization': discord_token}, 
-            timeout=10
-        )
+        response = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages', 
+                                headers={'Authorization': discord_token}, timeout=10)
 
         if response.status_code == 200:
             messages = response.json()
 
             if messages:
-                # Filter hanya pesan dari target username yang membalas pesan bot
-                target_messages = [
-                    msg for msg in messages
-                    if msg['author']['username'] in target_usernames and 
-                    msg.get('referenced_message') and 
-                    msg['referenced_message']['author']['id'] == bot_id and 
-                    msg['id'] not in processed_message_ids
-                ]
+                latest_message = messages[0]
+                user_message = latest_message['content']
+                user_id = latest_message['author']['id']
+                username = latest_message['author']['username']
+                message_id = latest_message['id']
+                referenced_message = latest_message.get("referenced_message")
 
-                # Proses pesan terbaru untuk setiap username target
-                for message in target_messages:
-                    message_id = message['id']
-                    user_message = message['content']
-                    username = message['author']['username']
+                # Replay mode logic
+                if replay_mode == "1":  # Membalas pesan terbaru
+                    should_reply = user_id != bot_id and (last_message_id is None or message_id != last_message_id)
+                elif replay_mode == "2":  # Membalas pesan jika username target membalas pesan bot
+                    should_reply = (user_id != bot_id 
+                                    and username == target_username
+                                    and referenced_message is not None
+                                    and referenced_message['author']['id'] == bot_id)
+                else:
+                    should_reply = False
 
-                    # Tandai pesan sebagai sudah diproses
-                    processed_message_ids.add(message_id)
-
+                if should_reply:
+                    last_message_id = message_id
+                    
                     response_message = dapatkan_respons_cohere(user_message)
+
+                    # Humanizer tambahan
+                    humanizer_variants = [
+                        f"{response_message} hehe",
+                        f"{response_message} haha",
+                        f"{response_message} bro", 
+                        f"{response_message} buddy",
+                        f"{response_message} my friend", 
+                        f"{response_message} mate",
+                        f"{response_message} brother",
+                        f"{response_message} bruh", 
+                        response_message
+                    ]
+                    response_message = random.choice(humanizer_variants)
 
                     payload = {
                         'content': response_message,
@@ -272,12 +274,10 @@ while True:
                         'Authorization': discord_token
                     }
 
-                    r = requests.post(
-                        f"https://discord.com/api/v9/channels/{channel_id}/messages", 
-                        json=payload, 
-                        headers=headers, 
-                        timeout=10
-                    )
+                    r = requests.post(f"https://discord.com/api/v9/channels/{channel_id}/messages", 
+                                      json=payload, 
+                                      headers=headers, 
+                                      timeout=10)
 
                     if r.status_code == 200:
                         print(Fore.WHITE + f"Sent message reply to username {username}: ")
@@ -289,7 +289,7 @@ while True:
                 else:
                     wib_timezone = pytz.timezone("Asia/Jakarta")
                     current_time_wib = datetime.now(wib_timezone)
-                    print(Fore.CYAN + f"Thirteen𝕏 | Menunggu Pesan Baru | {current_time_wib.strftime('%H:%M:%S %d-%m-%Y')}")
+                    print(Fore.CYAN + f"Thirteen𝕏 | Menunggu Pesan Baru... [{current_time_wib.strftime('%Y-%m-%d %H:%M:%S')}]")
             else:
                 print("Channel kosong atau tidak ada pesan baru.")
         else:
