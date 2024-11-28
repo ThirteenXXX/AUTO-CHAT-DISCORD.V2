@@ -167,7 +167,7 @@ def dapatkan_respons_cohere(pesan_pengguna):
             }
             
             try:
-                response = requests.post("https://api.cohere.ai/v2/generate", headers=headers, json=data, timeout=10)
+                response = requests.post("https://api.cohere.ai/v2/generate", headers=headers, json=data, timeout=2)
                 
                 if response.status_code == 200:
                     response_data = response.json()
@@ -179,7 +179,7 @@ def dapatkan_respons_cohere(pesan_pengguna):
                 else:
                     print(Fore.RED + f"Gagal mendapatkan respons dari Cohere: {response.status_code}")
                     respons = "Nice bro"
-                    time.sleep(0)
+                    break
             except requests.exceptions.RequestException as e:
                 print(Fore.RED + f"Error saat koneksi ke API: {e}")
                 respons = "Oops, ada kesalahan koneksi."
