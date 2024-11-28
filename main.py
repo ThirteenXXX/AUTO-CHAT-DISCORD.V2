@@ -14,7 +14,7 @@ ascii_art = r'''
  / / / / / / / /  / /_/  __/  __/ / / /   |  
 /_/ /_/ /_/_/_/   \__/\___/\___/_/ /_/_/|_|  
 
-              >>> ᴀᴜᴛᴏ ʀᴇᴘʟᴀʏ ᴄʜᴀᴛ ᴅᴄ ᴡɪᴛʜ ᴀɪ
+   >>> >>> >>> ᴀᴜᴛᴏ ʀᴇᴘʟᴀʏ ᴄʜᴀᴛ ᴅᴄ ᴡɪᴛʜ ᴀɪ ᴠ.2
 ___________________________________________
 '''
 
@@ -103,7 +103,7 @@ def get_current_api_key():
 def rotate_api_key():
     global current_api_key_index
     current_api_key_index = (current_api_key_index + 1) % len(cohere_api_keys)
-    print(Fore.YELLOW + f"API key rotated. Using key index: {current_api_key_index}")
+    print(Fore.YELLOW + f"API key rotated, Using key index: {current_api_key_index}")
     
 
 last_message_id = None
@@ -167,7 +167,7 @@ def dapatkan_respons_cohere(pesan_pengguna):
             }
             
             try:
-                response = requests.post("https://api.cohere.ai/v1/generate", headers=headers, json=data, timeout=10)
+                response = requests.post("https://api.cohere.ai/v2/generate", headers=headers, json=data, timeout=10)
                 
                 if response.status_code == 200:
                     response_data = response.json()
@@ -179,11 +179,11 @@ def dapatkan_respons_cohere(pesan_pengguna):
                 else:
                     print(Fore.RED + f"Gagal mendapatkan respons dari Cohere: {response.status_code}")
                     respons = "Nice bro"
-                    break
+                    time.sleep(0)
             except requests.exceptions.RequestException as e:
                 print(Fore.RED + f"Error saat koneksi ke API: {e}")
                 respons = "Oops, ada kesalahan koneksi."
-                break
+                time.sleep(0)
     
     respons = respons.replace('ai assistant', 'best friend').replace('chat bot', 'homeless').replace('chatbot', 'homeless').replace('cohere', 'my senior').replace('coral', 'homeless').replace('hey there,', '').replace('bot,', 'homeless').replace('"', '').replace(':', '').replace('!', ',').replace('-', ' ').replace('.', '').lower()
     return respons 
@@ -249,20 +249,6 @@ while True:
                     last_message_id = message_id
                     
                     response_message = dapatkan_respons_cohere(user_message)
-
-                    # Humanizer tambahan
-                    humanizer_variants = [
-                        f"{response_message} hehe",
-                        f"{response_message} haha",
-                        f"{response_message} bro", 
-                        f"{response_message} buddy",
-                        f"{response_message} my friend", 
-                        f"{response_message} mate",
-                        f"{response_message} brother",
-                        f"{response_message} bruh", 
-                        response_message
-                    ]
-                    response_message = random.choice(humanizer_variants)
 
                     payload = {
                         'content': response_message,
