@@ -14,7 +14,7 @@ ascii_art = r'''
  / / / / / / / /  / /_/  __/  __/ / / /   |  
 /_/ /_/ /_/_/_/   \__/\___/\___/_/ /_/_/|_|  
 
-   >>> >>> >>> ᴀᴜᴛᴏ ʀᴇᴘʟᴀʏ ᴄʜᴀᴛ ᴅᴄ ᴡɪᴛʜ ᴀɪ ᴠ.2
+ >>> >>> >>> ᴀᴜᴛᴏ ʀᴇᴘʟᴀʏ ᴄʜᴀᴛ ᴅᴄ ᴡɪᴛʜ ᴀɪ ᴠ.1
 ___________________________________________
 '''
 
@@ -112,6 +112,7 @@ prompts = {
     "curious": "{user_message}\nRespond with a short answer no more than 50 letter like someone who doesn't know much and always asks questions:"
 }
 
+# Tambahkan kata kunci baru di bagian keywords
 keywords = {
     "curious": ["what", "how", "why","help"]
 }
@@ -127,7 +128,7 @@ kata_kunci_tentang_bot = [
     "GPT", "gpt", "ChatGPT", "chatgpt", "CHATGPT", "Chat GPT", "chat GPT", "CHAT GPT",
     "is this gpt", "gpt bot", "are you gpt", "are you chatgpt", "is this chatgpt", "chat gpt",
     "are you powered by gpt", "is this a gpt bot", "gpt chat", "openai gpt", "chat-gpt",
-    "robot", "Robot", "ROBOT", "roboto", "ROBOTO", "robotic", "ROBOTIC", "ai bot", "AI Bot", "AI BOT", "ai-bot", "How are you?"
+    "robot", "Robot", "ROBOT", "roboto", "ROBOTO", "robotic", "ROBOTIC", "ai bot", "AI Bot", "AI BOT", "ai-bot"
     # More keywords omitted for brevity
 ]
 
@@ -167,13 +168,13 @@ def dapatkan_respons_cohere(pesan_pengguna):
             }
             
             try:
-                response = requests.post("https://api.cohere.ai/v2/generate", headers=headers, json=data, timeout=2)
+                response = requests.post("https://api.cohere.ai/v1/generate", headers=headers, json=data, timeout=10)
                 
                 if response.status_code == 200:
                     response_data = response.json()
                     respons = response_data['generations'][0]['text'].strip()
-                    break
-                elif response.status_code == 429:
+                    break  # Exit the loop as the API call succeeded
+                elif response.status_code == 429:  # Rate limit error
                     print(Fore.RED + "API limit reached. Rotating API key...")
                     rotate_api_key()
                 else:
@@ -183,9 +184,9 @@ def dapatkan_respons_cohere(pesan_pengguna):
             except requests.exceptions.RequestException as e:
                 print(Fore.RED + f"Error saat koneksi ke API: {e}")
                 respons = "Oops, ada kesalahan koneksi."
-                time.sleep(0)
+                break
     
-    respons = respons.replace('ai assistant', 'best friend').replace('chat bot', 'homeless').replace('chatbot', 'homeless').replace('cohere', 'my senior').replace('coral', 'homeless').replace('hey there,', '').replace('bot,', 'homeless').replace('"', '').replace(':', '').replace('!', ',').replace('-', ' ').replace('.', '').lower()
+    respons = respons.replace('ai assistant', 'best friend').replace('chat bot', 'ThirteenX').replace('chatbot', 'ThirteenX').replace('cohere', 'my senior').replace('coral', 'ThirteenX').replace('hey there,', '').replace('"', '').replace(':', '').replace('!', ',').replace('-', ' ').replace('.', '').lower()
     return respons 
 
 def get_bot_id():
@@ -208,75 +209,76 @@ bot_id = get_bot_id()
 if not bot_id:
     print(Fore.RED + "Tidak dapat mendapatkan bot ID. Periksa token atau koneksi Anda.")
     exit()
-    
+
 # Tambahkan opsi replay
 replay_mode = input("𝙿𝙸𝙻𝙸𝙷 𝙼𝙴𝚃𝙷𝙾𝙳𝙴 𝚁𝙴𝙿𝙻𝙰𝚈:\n1. 𝚁𝙴𝙿𝙻𝙰𝚈 𝙿𝙴𝚂𝙰𝙽 𝚃𝙴𝚁𝙱𝙰𝚁𝚄\n2. 𝚁𝙴𝙿𝙻𝙰𝚈 𝙿𝙴𝚂𝙰𝙽 𝚃𝙰𝚁𝙶𝙴𝚃 𝚄𝚂𝙴𝚁𝙽𝙰𝙼𝙴\n𝙿𝙸𝙻𝙸𝙷 𝙼𝙴𝚃𝙷𝙾𝙳𝙴 (1/2): ").strip()
 
 if replay_mode == "2":
-    target_username = input("𝙼𝙰𝚂𝚄𝙺𝙰𝙽 𝚄𝚂𝙴𝚁𝙽𝙰𝙼𝙴 𝚃𝙰𝚁𝙶𝙴𝚃: ").strip().split(',')
-    target_username = [username.strip() for username in target_username]
+    target_usernames = input("𝙼𝙰𝚂𝚄𝙺𝙰𝙽 𝚄𝚂𝙴𝚁𝙽𝙰𝙼𝙴 𝚃𝙰𝚁𝙶𝙴𝚃 (pisahkan dengan koma): ").strip().split(',')
+    target_usernames = [username.strip() for username in target_usernames]
 else:
-    target_username = []
+    target_usernames = []
 
+# Penyimpanan ID pesan terakhir yang telah dibalas untuk masing-masing username
+last_replied_ids = {}
+ 
 while True:
     try:
-        response = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages', 
+        response = requests.get(f'https://discord.com/api/v9/channels/{channel_id}/messages',
                                 headers={'Authorization': discord_token}, timeout=10)
 
         if response.status_code == 200:
             messages = response.json()
 
             if messages:
-                latest_message = messages[0]
-                user_message = latest_message['content']
-                user_id = latest_message['author']['id']
-                username = latest_message['author']['username']
-                message_id = latest_message['id']
-                referenced_message = latest_message.get("referenced_message")
+                # Proses pesan terbaru terlebih dahulu
+                for message in messages:
+                    user_message = message['content']
+                    user_id = message['author']['id']
+                    username = message['author']['username']
+                    message_id = message['id']
 
-                # Replay mode logic
-                if replay_mode == "1":  # Membalas pesan terbaru
-                    should_reply = user_id != bot_id and (last_message_id is None or message_id != last_message_id)
-                elif replay_mode == "2":  # Membalas pesan jika username target membalas pesan bot
-                    should_reply = (user_id != bot_id 
-                                    and username in target_username
-                                    and referenced_message is not None
-                                    and referenced_message['author']['id'] == bot_id)
-                else:
-                    should_reply = False
+                    # Replay mode logic
+                    if replay_mode == "1":  # Membalas pesan terbaru
+                        if user_id != bot_id and (last_message_id is None or message_id != last_message_id):
+                            response_message = dapatkan_respons_cohere(user_message)
+                            kirim_pesan_balasan(channel_id, message_id, response_message)
+                            last_message_id = message_id
+                            break
 
-                if should_reply:
-                    last_message_id = message_id
-                    
-                    response_message = dapatkan_respons_cohere(user_message)
+                    elif replay_mode == "2":  # Replay ke target username
+                        if username in target_usernames:
+                            if last_replied_ids.get(username) != message_id and user_id != bot_id:
+                                response_message = dapatkan_respons_cohere(user_message)
 
-                    payload = {
-                        'content': response_message,
-                        'message_reference': {
-                            'message_id': message_id
-                        }
-                    }
+                                payload = {
+                                    'content': response_message,
+                                    'message_reference': {
+                                        'message_id': message_id
+                                    }
+                                }
 
-                    headers = {
-                        'Authorization': discord_token
-                    }
+                                headers = {
+                                    'Authorization': discord_token
+                                }
 
-                    r = requests.post(f"https://discord.com/api/v9/channels/{channel_id}/messages", 
-                                      json=payload, 
-                                      headers=headers, 
-                                      timeout=10)
+                                r = requests.post(f"https://discord.com/api/v9/channels/{channel_id}/messages",
+                                                  json=payload,
+                                                  headers=headers,
+                                                  timeout=10)
 
-                    if r.status_code == 200:
-                        print(Fore.WHITE + f"Sent message reply to username {username}: ")
-                        print(Fore.YELLOW + payload['content'])
-                    else:
-                        print(Fore.RED + f"Gagal mengirim balasan: {r.status_code}")
-                    
-                    time.sleep(sleep_interval)
-                else:
-                    wib_timezone = pytz.timezone("Asia/Jakarta")
-                    current_time_wib = datetime.now(wib_timezone)
-                    print(Fore.CYAN + f"Thirteen𝕏 | Menunggu Pesan Baru... [{current_time_wib.strftime('%Y-%m-%d %H:%M:%S')}]")
+                                if r.status_code == 200:
+                                    print(Fore.WHITE + f"Sent message reply to username {username}: ")
+                                    print(Fore.YELLOW + payload['content'])
+                                    last_replied_ids[username] = message_id  # Perbarui ID terakhir yang dibalas
+                                else:
+                                    print(Fore.RED + f"Gagal mengirim balasan: {r.status_code}")
+
+                                time.sleep(sleep_interval)
+                            break
+                        else:
+                            print(Fore.YELLOW + f"Pesan dari {username} diabaikan (bukan target).")
+
             else:
                 print("Channel kosong atau tidak ada pesan baru.")
         else:
@@ -284,5 +286,5 @@ while True:
 
     except requests.exceptions.RequestException as e:
         print(Fore.RED + f"Kesalahan koneksi saat mendapatkan pesan: {e}")
-    
+
     time.sleep(sleep_interval)
