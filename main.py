@@ -109,7 +109,7 @@ def rotate_api_key():
 last_message_id = None
 
 prompts = {
-    "curious": "{user_message}\nRespond with a short answer no more than 50 letter like someone who doesn't know much and always asks questions:"
+    "curious": "{user_message}\nRespond with nigerian accent and short answers no more than 50 letter like someone who doesn't know much and always asks questions:"
 }
 
 # Tambahkan kata kunci baru di bagian keywords
